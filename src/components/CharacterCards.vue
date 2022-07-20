@@ -23,11 +23,34 @@
           </div>
         </div>
       </div>
-    </div>
 
-    <div v-if="loadingState === 'loading'" class="loading">
-      <span class="text-gray-500">Loading characters...</span>
-      <img src="/spinner.svg" alt="loading" />
+      <div v-if="characterLoadingState === 'loading'" class="loading">
+        <span class="text-gray-500">Loading characters...</span>
+        <img src="/spinner.svg" alt="loading" />
+      </div>
+    </div>
+    <div>
+      <h1 class="text-2xl text-center border-t-4 border-b-2 p-4">Locations</h1>
+      <div class="m-auto container flex flex-wrap mt-10">
+        <div v-for="location in (locations as Location[])" :key="location.id"
+          class="xl:w-1/5 lg:w-1/4 md:w-1/3 w-1/2 card">
+          <div class="card-inner">
+            <div class="content text-center mt-5">
+              <span class="header text-xl">{{ location.name }}</span>
+              <div class="text-center text-gray-500 text-sm">
+                <div class="">Type: {{ location.type }}</div>
+                <div>Dimension: {{ location.dimension }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="locationsLoadingState === 'loading'" class="loading">
+        <span class="text-gray-500">Loading locations...</span>
+        <img src="/spinner.svg" alt="loading" />
+      </div>
+
     </div>
   </div>
 </template>
@@ -35,12 +58,22 @@
 <script setup lang="ts">
 import { orderBy } from "lodash";
 import { ref, computed, onMounted } from "vue";
-import useFetchAllCharacters from "@/composables/useFetchAllCharacters";
+import useFetchResource from "@/composables/useFetchResource";
 
-const { characters, loadingState, fetchAllCharacters } =
-  useFetchAllCharacters();
+const {
+  data: characters,
+  loadingState: characterLoadingState,
+  fetchResource: characterFetchResource
+} = useFetchResource("https://rickandmortyapi.com/api/character");
+
+const {
+  data: locations,
+  loadingState: locationsLoadingState,
+  fetchResource: locationsFetchResource
+} = useFetchResource("https://rickandmortyapi.com/api/location");
 
 type Character = { id: String, name: String, status: String, species: String };
+type Location = { id: String, name: String, type: String, dimension: String };
 
 const orderKey = ref("id");
 
@@ -51,7 +84,10 @@ const setOrderKey = (key: string) => {
   orderKey.value = key;
 };
 
-onMounted(() => fetchAllCharacters());
+onMounted(() => {
+  characterFetchResource();
+  locationsFetchResource();
+});
 </script>
 
 <style scoped>
