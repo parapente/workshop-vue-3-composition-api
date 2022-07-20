@@ -59,6 +59,7 @@
 import { orderBy } from "lodash";
 import { ref, computed, onMounted } from "vue";
 import useFetchResource from "@/composables/useFetchResource";
+import useGlobalEvent from "@/composables/useGlobalEvent";
 
 const {
   data: characters,
@@ -88,6 +89,8 @@ onMounted(() => {
   characterFetchResource();
   locationsFetchResource();
 });
+
+useGlobalEvent("keypress", () => { characters.value.shift() });
 </script>
 
 <style scoped>
