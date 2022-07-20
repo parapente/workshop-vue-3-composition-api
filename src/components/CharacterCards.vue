@@ -8,7 +8,8 @@
       <button class="btn bg-orange-500" @click="setOrderKey('id')">Id</button>
     </div>
     <div class="m-auto container flex flex-wrap mt-10">
-      <div v-for="character in charactersOrdered" :key="character.id" class="xl:w-1/5 lg:w-1/4 md:w-1/3 w-1/2 card">
+      <div v-for="character in (charactersOrdered as Character[])" :key="character.id"
+        class="xl:w-1/5 lg:w-1/4 md:w-1/3 w-1/2 card">
         <div class="card-inner">
           <div class="image">
             <img :src="character.image" class="bg-gray-200" height="300" width="300" />
@@ -31,47 +32,34 @@
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import axios from "axios";
 import { orderBy } from "lodash";
-import { ref } from "vue";
-export default {
-  data() {
-    return {
-      orderKey: "id",
-    };
-  },
-  computed: {
-    charactersOrdered() {
-      return orderBy(this.characters, this.orderKey);
-    },
-  },
-  setup() {
-    const characters = ref([]);
-    const loadingState = ref(null);
+import { ref, computed, onMounted } from "vue";
 
-    const fetchAllCharacters = () => {
-      axios
-        .get("https://rickandmortyapi.com/api/character")
-        .then((response) => {
-          setTimeout(() => {
-            loadingState.value = "success";
-            characters.value = response.data.results;
-          }, 1000);
-        });
-    };
+type Character = { id: String, name: String, status: String, species: String };
 
-    return { loadingState, characters, fetchAllCharacters };
-  },
-  methods: {
-    setOrderKey(key) {
-      this.orderKey = key;
-    },
-  },
-  created() {
-    this.fetchAllCharacters();
-  },
+const characters = ref([]);
+const loadingState = ref("");
+const orderKey = ref("id");
+
+const charactersOrdered = computed(() =>
+  orderBy(characters.value, [orderKey.value]));
+
+const fetchAllCharacters = () => {
+  axios.get("https://rickandmortyapi.com/api/character").then((response) => {
+    setTimeout(() => {
+      loadingState.value = "success";
+      characters.value = response.data.results;
+    }, 1000);
+  });
 };
+
+const setOrderKey = (key: string) => {
+  orderKey.value = key;
+};
+
+onMounted(() => fetchAllCharacters());
 </script>
 
 <style scoped>
